@@ -1,0 +1,30 @@
+---
+name: release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout@scm
+        uses: actions/checkout@master
+
+      - name: setup@node
+        uses: actions/setup-node@master
+        with:
+          node-version: '18.x'
+          always-auth: true
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: setup@yarn
+        run: npm install -g yarn
+
+      - name: publish@yarn
+        run: yarn publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

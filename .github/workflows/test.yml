@@ -1,0 +1,37 @@
+---
+name: test-suite
+
+on:
+  - push
+
+jobs:
+  test-suite:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout@scm
+        uses: actions/checkout@master
+
+      - name: setup@node
+        uses: actions/setup-node@master
+        with:
+          node-version: '18.x'
+          always-auth: true
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: setup@yarn
+        run: npm install -g yarn
+
+      - name: install@yarn
+        run: yarn install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: lint@yarn
+        run: yarn run lint
+
+      - name: build@yarn
+        run: yarn run build
+
+      - name: test@yarn
+        run: yarn run test
