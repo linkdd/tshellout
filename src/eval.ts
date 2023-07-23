@@ -4,6 +4,7 @@ import fs from 'node:fs'
 
 import * as errors from './errors'
 import { Command } from './ast'
+import { quote } from './toShellScript'
 
 export interface Stdio {
   stdin: Writable,
@@ -15,14 +16,10 @@ export interface Stdio {
 const evalCommand = async (node: Command): Promise<Stdio> => {
   switch (node.type) {
     case 'spawn': {
-      const child = spawn(
-        node.executable,
-        node.args,
-        {
-          shell: true,
-          stdio: ['pipe', 'pipe', 'pipe'],
-        },
-      )
+      const child = spawn(node.executable, node.args.map(quote), {
+        shell: true,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
 
       const terminated = new Promise<void>((resolve, reject) => {
         child.on('close', (code, signal) => {
