@@ -7,10 +7,10 @@ import { Command } from './ast'
 import { quote } from './toShellScript'
 
 export interface Stdio {
-  stdin: Writable,
-  stdout: Readable,
-  stderr: Readable,
-  terminated: Promise<void>,
+  stdin: Writable
+  stdout: Readable
+  stderr: Readable
+  terminated: Promise<void>
 }
 
 const evalCommand = async (node: Command): Promise<Stdio> => {
@@ -26,12 +26,10 @@ const evalCommand = async (node: Command): Promise<Stdio> => {
           if (code !== null) {
             if (code === 0) {
               resolve()
-            }
-            else {
+            } else {
               reject(new errors.NonZeroExitCode(code))
             }
-          }
-          else {
+          } else {
             reject(new errors.ProcessTerminated(signal!))
           }
         })
@@ -115,14 +113,13 @@ const evalCommand = async (node: Command): Promise<Stdio> => {
 
       const terminated = lhs.terminated
         .catch(() =>
-          evalCommand(node.rhs)
-            .then((rhs) => {
-              rhs.stdin.end()
-              rhs.stdout.pipe(stdout, { end: false })
-              rhs.stderr.pipe(stderr, { end: false })
+          evalCommand(node.rhs).then((rhs) => {
+            rhs.stdin.end()
+            rhs.stdout.pipe(stdout, { end: false })
+            rhs.stderr.pipe(stderr, { end: false })
 
-              return rhs.terminated
-            })
+            return rhs.terminated
+          })
         )
         .finally(() => {
           stdout.end()
@@ -143,8 +140,7 @@ const evalCommand = async (node: Command): Promise<Stdio> => {
       const target = fs.createWriteStream(node.path)
       cmd.stdout.pipe(target, { end: false })
 
-      const terminated = cmd.terminated
-        .finally(() => target.end())
+      const terminated = cmd.terminated.finally(() => target.end())
 
       return {
         stdin: cmd.stdin,
@@ -160,8 +156,7 @@ const evalCommand = async (node: Command): Promise<Stdio> => {
       const target = fs.createWriteStream(node.path)
       cmd.stderr.pipe(target, { end: false })
 
-      const terminated = cmd.terminated
-        .finally(() => target.end())
+      const terminated = cmd.terminated.finally(() => target.end())
 
       return {
         stdin: cmd.stdin,

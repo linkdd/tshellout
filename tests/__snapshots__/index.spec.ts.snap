@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`command runner should chain commands with && 1`] = `"(printf 'hello ') && printf world"`;
+
+exports[`command runner should chain commands with || 1`] = `"(exit 1) || echo 'hello world'"`;
+
+exports[`command runner should pipe stdout to stdin 1`] = `"echo 'hello world' | tr -d '\\r' | tr -d '\\n' | wc -c"`;
+
+exports[`command runner should redirect a file to stdin 1`] = `"(cat) < /var/folders/6f/y7zxg6h56r38gv53tqxxcwv00000gq/T/tshellout-test-stdin-v210dP/stdin.txt"`;
+
+exports[`command runner should redirect stderr to a file 1`] = `"(>&2 echo 'hello world') 2> /var/folders/6f/y7zxg6h56r38gv53tqxxcwv00000gq/T/tshellout-test-stderr-appOr5/stderr.txt"`;
+
+exports[`command runner should redirect stdout to a file 1`] = `"(echo 'hello world') > /var/folders/6f/y7zxg6h56r38gv53tqxxcwv00000gq/T/tshellout-test-stdout-GzEXzC/stdout.txt"`;
+
+exports[`command runner should return exit code 1`] = `"exit 42"`;
+
+exports[`command runner should return stderr 1`] = `">&2 echo 'hello world'"`;
+
+exports[`command runner should return stdout 1`] = `"echo 'hello world'"`;
+
+exports[`command runner should short-circuit on failure with && 1`] = `"(exit 1) && echo 'hello world'"`;
+
+exports[`command runner should short-circuit on success with || 1`] = `"(echo 'hello world') || exit 1"`;
+
+exports[`command runner should write to stdin 1`] = `"cat <<< "$(base64 -d <<< aGVsbG8gd29ybGQK)""`;
+
+exports[`command template literal inserts interpolated commands literally 1`] = `"echo Running command: exit 0 "`;
+
+exports[`command template literal omits interpolated null | undefined 1`] = `"echo   hi"`;
+
+exports[`command template literal omits interpolated null | undefined 2`] = `"echo   bye"`;
+
+exports[`command template literal shell-escapes interpolated strings 1`] = `"echo 'hello world' "`;
