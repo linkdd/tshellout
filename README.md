@@ -21,7 +21,7 @@ $ npm i tshellout
 Then in a script:
 
 ```typescript
-import command from 'tshellout'
+import { command, script } from 'tshellout'
 
 const cmd = command('echo', 'hello world')
 const res = await cmd.run()
@@ -85,6 +85,21 @@ const res = await cmd.run()
 const cmd = command('cat')
   .writeStdin(Buffer.from('hello world\n'))
 const res = await cmd.run()
+```
+
+We can also execute scripts:
+
+```typescript
+const cmd = script`
+  echo hello
+  echo world
+`
+
+// equivalent to:
+
+const cmd = command('true')
+  .and(command('echo hello'))
+  .and(command('echo world'))
 ```
 
 We can also avoid capturing the output, and raise on errors:
