@@ -87,6 +87,34 @@ const cmd = command('cat')
 const res = await cmd.run()
 ```
 
+We can also avoid capturing the output, and raise on errors:
+
+```typescript
+await command('echo', 'hello world').exec()
+```
+
+Parameters of both `run()` and `exec()` methods can be overridden:
+
+```typescript
+class CommandBuilder {
+  // ...
+  async run(options?: {
+    capture: { stdout: boolean, stderr: boolean },
+    raiseOnError: boolean,
+  }) { /* ... */ }
+
+  async exec(options?: {
+    capture: { stdout: boolean, stderr: boolean },
+    raiseOnError: boolean,
+  }) { /* ... */ }
+}
+```
+
+The defaults are:
+
+  - `run()`: `{ capture: { stdout: true, stderr: true }, raiseOnError: false }`
+  - `exec()`: `{ capture: { stdout: false, stderr: false }, raiseOnError: true }`
+
 ## :page_facing_up: License
 
 This project is released under the terms of the [MIT License](./LICENSE.txt).
