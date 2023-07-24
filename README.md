@@ -34,10 +34,10 @@ console.log(res.stderr.toString())
 More examples:
 
 ```typescript
-// echo hello world | tr -d \r | tr -d \n | wc -c
+// echo "hello world" | tr -d "\r" | tr -d "\n" | wc -c
 const cmd = command('echo', 'hello world')
-  .pipe(command('tr', '-d', '\\r'))
-  .pipe(command('tr', '-d', '\\n'))
+  .pipe(command('tr', '-d', '"\\r"'))
+  .pipe(command('tr', '-d', '"\\n"'))
   .pipe(command('wc', '-c'))
 const res = await cmd.run()
 ```
@@ -65,7 +65,7 @@ const res = await cmd.run()
 ```
 
 ```typescript
-// echo hello world > greet.txt
+// echo "hello world" > greet.txt
 const cmd = command('echo', 'hello world')
   .redirectStdout('greet.txt')
 const res = await cmd.run()
