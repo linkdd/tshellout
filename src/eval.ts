@@ -12,12 +12,24 @@ export interface Stdio {
   terminated: Promise<void>,
 }
 
+const quote = (s: string): string => {
+  if ((/["\s]/).test(s) && !(/'/).test(s)) {
+    return "'" + s.replace(/(['\\])/g, '\\$1') + "'"
+  }
+
+  if ((/["'\s]/).test(s)) {
+    return '"' + s.replace(/(["\\$`!])/g, '\\$1') + '"'
+  }
+
+  return s.replace(/([A-Za-z]:)?([#!"$&'()*,:;<=>?@[\\\]^`{|}])/g, '$1\\$2')
+}
+
 const evalCommand = async (node: Command): Promise<Stdio> => {
   switch (node.type) {
     case 'spawn': {
       const child = spawn(
         node.executable,
-        node.args,
+        node.args.map(quote),
         {
           shell: true,
           stdio: ['pipe', 'pipe', 'pipe'],

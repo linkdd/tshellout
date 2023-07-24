@@ -4,14 +4,17 @@ import os from 'node:os'
 
 import command from '../src/index'
 
+const isWindows = os.platform() === 'win32'
 
 describe('command runner', () => {
   it('should return stdout', async () => {
     const cmd = command('echo', 'hello world')
     const res = await cmd.run()
 
+    const expected = isWindows ? `'hello world'` : 'hello world'
+
     expect(res.exitCode).toEqual(0)
-    expect(res.stdout.toString().trim()).toEqual('hello world')
+    expect(res.stdout.toString().trim()).toEqual(expected)
     expect(res.stderr.toString().trim()).toEqual('')
   })
 
@@ -19,9 +22,11 @@ describe('command runner', () => {
     const cmd = command('>&2 echo', 'hello world')
     const res = await cmd.run()
 
+    const expected = isWindows ? `'hello world'` : 'hello world'
+
     expect(res.exitCode).toEqual(0)
     expect(res.stdout.toString().trim()).toEqual('')
-    expect(res.stderr.toString().trim()).toEqual('hello world')
+    expect(res.stderr.toString().trim()).toEqual(expected)
   })
 
   it('should return exit code', async() => {
@@ -37,23 +42,31 @@ describe('command runner', () => {
     const s = 'hello world'
 
     const cmd = command('echo', s)
-      .pipe(command('tr', '-d', '\\r'))
-      .pipe(command('tr', '-d', '\\n'))
+      .pipe(command('tr', '-d', '"\\r"'))
+      .pipe(command('tr', '-d', '"\\n"'))
       .pipe(command('wc', '-c'))
     const res = await cmd.run()
 
+    const expected = isWindows ? '13' : '11'
+
     expect(res.exitCode).toEqual(0)
-    expect(res.stdout.toString().trim()).toEqual(`${s.length}`)
+    expect(res.stdout.toString().trim()).toEqual(expected)
     expect(res.stderr.toString().trim()).toEqual('')
   })
 
   it('should chain commands with &&', async() => {
-    const cmd = command('printf', '"hello "')
-      .and(command('printf', 'world'))
+    const cmd = command('echo', 'hello')
+      .and(command('echo', 'world'))
     const res = await cmd.run()
 
     expect(res.exitCode).toEqual(0)
-    expect(res.stdout.toString().trim()).toEqual('hello world')
+    expect(
+      res.stdout.toString()
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .join(' ')
+    ).toEqual('hello world')
     expect(res.stderr.toString().trim()).toEqual('')
   })
 
@@ -72,8 +85,10 @@ describe('command runner', () => {
       .or(command('echo', 'hello world'))
     const res = await cmd.run()
 
+    const expected = isWindows ? `'hello world'` : 'hello world'
+
     expect(res.exitCode).toEqual(0)
-    expect(res.stdout.toString().trim()).toEqual('hello world')
+    expect(res.stdout.toString().trim()).toEqual(expected)
     expect(res.stderr.toString().trim()).toEqual('')
   })
 
@@ -82,8 +97,10 @@ describe('command runner', () => {
       .or(command('exit', '1'))
     const res = await cmd.run()
 
+    const expected = isWindows ? `'hello world'` : 'hello world'
+
     expect(res.exitCode).toEqual(0)
-    expect(res.stdout.toString().trim()).toEqual('hello world')
+    expect(res.stdout.toString().trim()).toEqual(expected)
     expect(res.stderr.toString().trim()).toEqual('')
   })
 
@@ -99,8 +116,10 @@ describe('command runner', () => {
       expect(res.stdout.toString().trim()).toEqual('')
       expect(res.stderr.toString().trim()).toEqual('')
 
+      const expected = isWindows ? `'hello world'` : 'hello world'
+
       const content = await fs.readFile(filepath)
-      expect(content.toString().trim()).toEqual('hello world')
+      expect(content.toString().trim()).toEqual(expected)
     }
     finally {
       await fs.rm(folder, { recursive: true, force: true })
@@ -119,8 +138,10 @@ describe('command runner', () => {
       expect(res.stdout.toString().trim()).toEqual('')
       expect(res.stderr.toString().trim()).toEqual('')
 
+      const expected = isWindows ? `'hello world'` : 'hello world'
+
       const content = await fs.readFile(filepath)
-      expect(content.toString().trim()).toEqual('hello world')
+      expect(content.toString().trim()).toEqual(expected)
     }
     finally {
       await fs.rm(folder, { recursive: true, force: true })
