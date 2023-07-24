@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
 
-import command from '../src/index'
+import { command, script } from '../src/index'
 
 const isWindows = os.platform() === 'win32'
 
@@ -174,6 +174,23 @@ describe('command runner', () => {
 
     expect(res.exitCode).toEqual(0)
     expect(res.stdout.toString().trim()).toEqual('hello world')
+    expect(res.stderr.toString().trim()).toEqual('')
+  })
+
+  it('should execute a script', async() => {
+    const res = await script`
+      echo hello
+      echo world
+    `.run()
+
+    expect(res.exitCode).toEqual(0)
+    expect(
+      res.stdout.toString()
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .join(' ')
+    ).toEqual('hello world')
     expect(res.stderr.toString().trim()).toEqual('')
   })
 })
