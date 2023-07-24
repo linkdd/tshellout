@@ -4,7 +4,7 @@ import { PathLike } from 'node:fs'
 
 import * as errors from './errors'
 import * as ast from './ast'
-import evalCommand from './eval'
+import evalCommand, { quote } from './eval'
 
 
 const readStream = async (stream: Readable): Promise<Buffer> => {
@@ -135,3 +135,37 @@ export class CommandBuilder {
 
 export const command = (executable: string, ...args: string[]) =>
   new CommandBuilder({ type: 'spawn', executable, args })
+
+export const script = (template: TemplateStringsArray, ...args: unknown[]) => {
+  const source = template
+    .map((s: string, i: number) => {
+      const arg = args[i]
+
+      if (arg === null || arg === undefined) {
+        return s
+      }
+      else if (typeof arg === 'string') {
+        return `${s}${quote(arg)}`
+      }
+      else if (typeof arg === 'number' || typeof arg === 'boolean') {
+        return `${s}${arg}`
+      }
+      else {
+        throw new TypeError(
+          `Unexpected template argument of type ${typeof arg}`
+        )
+      }
+    })
+    .join('')
+
+  const commands = source
+    .split(';')
+    .flatMap(s => s.split('\n'))
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+
+  return commands.reduce(
+    (builder, cmd) => builder.and(command(cmd)),
+    command('true')
+  )
+}

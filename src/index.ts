@@ -1,3 +1,1 @@
-import { command } from './builder'
-
-export default command
+export { command, script } from './builder'

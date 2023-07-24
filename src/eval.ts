@@ -12,7 +12,7 @@ export interface Stdio {
   terminated: Promise<void>,
 }
 
-const quote = (s: string): string => {
+export const quote = (s: string): string => {
   if ((/["\s]/).test(s) && !(/'/).test(s)) {
     return "'" + s.replace(/(['\\])/g, '\\$1') + "'"
   }
