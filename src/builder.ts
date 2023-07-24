@@ -52,12 +52,23 @@ export class CommandBuilder {
     return new CommandBuilder({ type: 'writeStdin', cmd: this.node, data })
   }
 
-  async run() {
+  private async eval(options: {
+    capture: { stdout: boolean, stderr: boolean },
+    raiseOnError: boolean,
+  }) {
     const stdio = await evalCommand(this.node)
     stdio.stdin.end()
 
-    const stdout = await readStream(stdio.stdout)
-    const stderr = await readStream(stdio.stderr)
+    const stdout = (
+      options.capture.stdout
+      ? await readStream(stdio.stdout)
+      : (stdio.stdout.pipe(process.stdout), Buffer.from(''))
+    )
+    const stderr = (
+      options.capture.stderr
+      ? await readStream(stdio.stderr)
+      : (stdio.stderr.pipe(process.stderr), Buffer.from(''))
+    )
 
     let exitCode = null
 
@@ -66,11 +77,16 @@ export class CommandBuilder {
       exitCode = 0
     }
     catch (err) {
-      if (err instanceof errors.NonZeroExitCode) {
-        exitCode = err.code
+      if (err instanceof errors.TShellOutError && !options.raiseOnError) {
+        if (err instanceof errors.NonZeroExitCode) {
+          exitCode = err.code
+        }
+        else {
+          console.error(err)
+        }
       }
       else {
-        console.error(err)
+        throw err
       }
     }
     finally {
@@ -88,6 +104,32 @@ export class CommandBuilder {
       stdout,
       stderr,
     }
+  }
+
+  async run(options?: {
+    capture: { stdout: boolean, stderr: boolean },
+    raiseOnError: boolean,
+  }) {
+    return await this.eval({
+      capture: {
+        stdout: options?.capture?.stdout ?? true,
+        stderr: options?.capture?.stderr ?? true,
+      },
+      raiseOnError: options?.raiseOnError ?? false
+    })
+  }
+
+  async exec(options?: {
+    capture: { stdout: boolean, stderr: boolean },
+    raiseOnError: boolean,
+  }) {
+    return await this.eval({
+      capture: {
+        stdout: options?.capture?.stdout ?? false,
+        stderr: options?.capture?.stderr ?? false,
+      },
+      raiseOnError: options?.raiseOnError ?? true
+    })
   }
 }
 
