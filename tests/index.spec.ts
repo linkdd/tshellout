@@ -178,7 +178,7 @@ describe('command runner', () => {
   })
 
   it('should execute a script', async() => {
-    const res = await script`
+    const res = await script.posix`
       echo hello
       echo world
     `.run()

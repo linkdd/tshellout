@@ -133,39 +133,39 @@ export class CommandBuilder {
   }
 }
 
+
 export const command = (executable: string, ...args: string[]) =>
   new CommandBuilder({ type: 'spawn', executable, args })
 
-export const script = (template: TemplateStringsArray, ...args: unknown[]) => {
-  const source = template
-    .map((s: string, i: number) => {
-      const arg = args[i]
 
-      if (arg === null || arg === undefined) {
-        return s
-      }
-      else if (typeof arg === 'string') {
-        return `${s}${quote(arg)}`
-      }
-      else if (typeof arg === 'number' || typeof arg === 'boolean') {
-        return `${s}${arg}`
-      }
-      else {
-        throw new TypeError(
-          `Unexpected template argument of type ${typeof arg}`
-        )
-      }
-    })
-    .join('')
+const makeSource = (template: TemplateStringsArray, args: unknown[]): string =>
+  template.map((s: string, i: number) => {
+    const arg = args[i]
 
-  const commands = source
-    .split(';')
-    .flatMap(s => s.split('\n'))
-    .map(s => s.trim())
-    .filter(s => s.length > 0)
+    if (arg === null || arg === undefined) {
+      return s
+    }
+    else if (typeof arg === 'string') {
+      return `${s}${quote(arg)}`
+    }
+    else if (typeof arg === 'number' || typeof arg === 'boolean') {
+      return `${s}${arg}`
+    }
+    else {
+      throw new TypeError(
+        `Unexpected template argument of type ${typeof arg}`
+      )
+    }
+  }).join('')
 
-  return commands.reduce(
-    (builder, cmd) => builder.and(command(cmd)),
-    command('true')
-  )
+
+export const script = {
+  posix: (template: TemplateStringsArray, ...args: unknown[]) => {
+    const src = makeSource(template, args)
+    return command('sh', '-').writeStdin(Buffer.from(src))
+  },
+  powershell: (template: TemplateStringsArray, ...args: unknown[]) => {
+    const src = makeSource(template, args)
+    return command('PowerShell', '-Command', '-').writeStdin(Buffer.from(src))
+  },
 }
