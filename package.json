@@ -1,6 +1,6 @@
 {
   "name": "tshellout",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "TypeScript Shell-out library",
   "repository": "https://github.com/linkdd/tshellout",
   "author": "David Delassus <david.jose.delassus@gmail.com>",
