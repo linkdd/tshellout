@@ -90,7 +90,8 @@ const res = await cmd.run()
 We can also execute scripts:
 
 ```typescript
-const cmd = script`
+const cmd = script.posix`
+  set -x
   echo hello
   echo world
 `
